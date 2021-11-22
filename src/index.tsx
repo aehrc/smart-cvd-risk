@@ -10,8 +10,6 @@ import {IPatient} from "@ahryman40k/ts-fhir-types/lib/R4";
 let rootElement = document.querySelector('#root');
 
 SMART.init({
-  iss:
-      "https://launch.smarthealthit.org/v/r3/sim/eyJoIjoiMSIsImIiOiJzbWFydC0xNjQyMDY4IiwiZSI6InNtYXJ0LVByYWN0aXRpb25lci03MTYxNDUwMiJ9/fhir",
   redirectUri: "test.html",
   clientId: "whatever",
   scope: "launch/patient offline_access openid fhirUser",
