@@ -1,5 +1,5 @@
 {
-  "name": "smart-cvd-risk",
+  "name": "cardiovascular-risk-calculator",
   "version": "0.1.0",
   "license": " Apache-2.0",
   "main": "src/index.tsx",
@@ -36,5 +36,7 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  }
+  },
+  "keywords": [],
+  "description": ""
 }
