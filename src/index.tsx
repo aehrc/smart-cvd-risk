@@ -11,9 +11,10 @@ import Prefetching from "./Prefetching";
 let rootElement = document.querySelector("#root");
 
 SMART.init({
+  iss: "https://www.demo.oridashi.com.au:8102",
   redirectUri: "test.html",
-  clientId: "whatever",
-  scope: "launch/patient offline_access openid fhirUser",
+  clientId: "47059543-3654-466b-9c71-495957306af0",
+  scope: "launch patient/*.read offline_access openid fhirUser",
 }).then(
   (client) => {
     render(

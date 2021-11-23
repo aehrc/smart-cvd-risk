@@ -91,7 +91,7 @@ export interface CVDRiskCalculatorParams {
   isMale?: boolean;
   age?: number;
   ethnicity?: string;
-  tcHdl?: number;
+  tcHdl?: number | null;
   systolicBP?: number;
   nzDep?: number;
   exSmoker?: boolean;
@@ -125,7 +125,8 @@ const Calculator = (
   const coeff = isMale ? maleCoefficients : femaleCoefficients;
 
   // use means to normalise values
-  const tcHdlOffset = tcHdl !== undefined ? tcHdl - coeff.tcHdlMean : undefined;
+  const tcHdlOffset =
+    tcHdl !== undefined && tcHdl !== null ? tcHdl - coeff.tcHdlMean : undefined;
 
   const ageOffset =
     age !== undefined && age !== null

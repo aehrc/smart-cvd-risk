@@ -1,19 +1,11 @@
 import * as React from "react";
+import { useState } from "react";
 import Container from "@mui/material/Container";
 import Typography from "@mui/material/Typography";
 import FormControl from "@mui/material/FormControl";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
-import {
-  Card,
-  InputLabel,
-  MenuItem,
-  Select,
-  Stack,
-  TextField,
-} from "@mui/material";
-import { CVDRiskCalculatorParams } from "./Calculator";
-import { useState } from "react";
+import { InputLabel, MenuItem, Select, Stack, TextField } from "@mui/material";
 import { PrefilledParams } from "./ParamsProvider";
 
 interface Props {
@@ -23,11 +15,19 @@ interface Props {
 export default function Form(props: Props) {
   const { initialParams } = props,
     [birthSex, setBirthSex] = useState(initialParams?.birthSex),
-    [age, setAge] = useState(initialParams?.age ?? undefined);
+    [age, setAge] = useState(initialParams?.age ?? undefined),
+    [tcHdl, setTcHdl] = useState(initialParams?.tcHdl ?? undefined);
 
   const FormField = (props: { children: any }) => (
     <FormControl fullWidth>{props.children}</FormControl>
   );
+
+  // const buildParams = (): CVDRiskCalculatorParams => {
+  //   return {
+  //     birthSex,
+  //     age,
+  //   };
+  // };
 
   return (
     <Container maxWidth="sm">
@@ -75,6 +75,7 @@ export default function Form(props: Props) {
             type="number"
             required
             inputProps={{ min: 0, max: 1, step: 0.1 }}
+            value={tcHdl}
           />
         </FormField>
         <FormField>
@@ -134,16 +135,7 @@ export default function Form(props: Props) {
             control={<Switch />}
           />
         </FormField>
-        <Card variant="outlined" sx={{ p: 2 }}>
-          <Stack direction="row" alignItems="center">
-            <Typography variant="h6" component="h2" sx={{ flexGrow: 1 }}>
-              Calculated risk score
-            </Typography>
-            <Typography color="primary" sx={{ textAlign: "right" }}>
-              (not enough information)
-            </Typography>
-          </Stack>
-        </Card>
+        {/*<Result params={params} />*/}
       </Stack>
     </Container>
   );
