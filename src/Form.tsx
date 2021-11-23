@@ -36,26 +36,21 @@ export default function Form(props: Props) {
     [ollm, setOllm] = useState(initialParams?.ollm ?? undefined),
     [oatm, setOatm] = useState(initialParams?.oatm ?? undefined);
 
-  // const buildParams = (): CVDRiskCalculatorParams => {
-  //   return {
-  //     birthSex,
-  //     age,
-  //   };
-  // };
-
   return (
-    <Container component="form" maxWidth="sm">
+    <Container component="form" maxWidth="sm" sx={{ pb: 8 }}>
       <Stack spacing={4} sx={{ my: 4 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
+        <Typography variant="h4" component="h1" sx={{ mb: 4 }}>
           Cardiovascular risk calculator
         </Typography>
         <FormControl fullWidth>
           <InputLabel id="birth-sex">Biological sex at birth</InputLabel>
           <Select
-            label="birth-sex"
+            labelId="birth-sex"
+            label="Biological sex at birth"
             required
             value={birthSex}
             onChange={(e) => setBirthSex(e.target.value)}
+            autoFocus
           >
             <MenuItem value="248152002">Female</MenuItem>
             <MenuItem value="248153007">Male</MenuItem>
@@ -131,7 +126,8 @@ export default function Form(props: Props) {
         <FormControl fullWidth>
           <InputLabel id="smoking">Smoking status</InputLabel>
           <Select
-            label="smoking"
+            labelId="smoking"
+            label="Smoking status"
             required
             value={smoker}
             onChange={(e) => setSmoker(e.target.value)}
@@ -196,7 +192,7 @@ export default function Form(props: Props) {
             }
           />
         </FormControl>
-        <FormControl fullWidth>
+        <FormControl fullWidth sx={{ pb: 2 }}>
           <FormControlLabel
             label="Currently taking anti-thrombotic medication?"
             control={
@@ -207,26 +203,24 @@ export default function Form(props: Props) {
             }
           />
         </FormControl>
-        {
-          <Result
-            params={{
-              birthSex,
-              age,
-              ethnicity,
-              totalCholesterol,
-              hdl,
-              systolicBP,
-              nzDep,
-              smoker,
-              familyHistory,
-              af,
-              diabetes,
-              obplm,
-              ollm,
-              oatm,
-            }}
-          />
-        }
+        <Result
+          params={{
+            birthSex,
+            age,
+            ethnicity,
+            totalCholesterol,
+            hdl,
+            systolicBP,
+            nzDep,
+            smoker,
+            familyHistory,
+            af,
+            diabetes,
+            obplm,
+            ollm,
+            oatm,
+          }}
+        />
       </Stack>
     </Container>
   );
