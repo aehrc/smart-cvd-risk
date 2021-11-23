@@ -7,6 +7,7 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
 import { InputLabel, MenuItem, Select, Stack, TextField } from "@mui/material";
 import { PrefilledParams } from "./ParamsProvider";
+import Result from "./Result";
 
 interface Props {
   initialParams?: PrefilledParams;
@@ -15,8 +16,22 @@ interface Props {
 export default function Form(props: Props) {
   const { initialParams } = props,
     [birthSex, setBirthSex] = useState(initialParams?.birthSex),
-    [age, setAge] = useState(initialParams?.age ?? undefined),
-    [tcHdl, setTcHdl] = useState(initialParams?.tcHdl ?? undefined);
+    [age, setAge] = useState(initialParams?.age ?? undefined);
+
+
+  const [totalCholesterol, setTotalCholesterol] = useState(initialParams?.totalCholesterol ?? undefined);
+  const [hdl, setHdl] = useState(initialParams?.hdl ?? undefined);
+  const [systolicBP, setSystolicBP] = useState(initialParams?.systolicBP ?? undefined);
+  const [nzDep, setNzDep] = useState(initialParams?.nzDep ?? undefined);
+  const [ethnicity, setEthnicity] = useState(initialParams?.ethnicity ?? undefined);
+  const [smoker, setSmoker] = useState(initialParams?.smoker ?? undefined);
+  const [familyHistory, setFamilyHistory] = useState(initialParams?.familyHistory ?? undefined);
+  const [af, setAf] = useState(initialParams?.af ?? undefined);
+  const [diabetes, setDiabetes] = useState(initialParams?.diabetes ?? undefined);
+  const [obplm, setObplm] = useState(initialParams?.obplm ?? undefined);
+  const [ollm, setOllm] = useState(initialParams?.ollm ?? undefined);
+  const [oatm, setOatm] = useState(initialParams?.oatm ?? undefined);
+
 
   const FormField = (props: { children: any }) => (
     <FormControl fullWidth>{props.children}</FormControl>
@@ -60,7 +75,12 @@ export default function Form(props: Props) {
         </FormField>
         <FormField>
           <InputLabel id="ethnicity">Ethnicity</InputLabel>
-          <Select label="ethnicity" required>
+          <Select
+              label="ethnicity"
+              required
+              value={ethnicity}
+              onChange={(e) => setEthnicity(e.target.value)}
+          >
             <MenuItem value="european">European</MenuItem>
             <MenuItem value="maori">Maori</MenuItem>
             <MenuItem value="pacific">Pacific</MenuItem>
@@ -71,11 +91,31 @@ export default function Form(props: Props) {
         </FormField>
         <FormField>
           <TextField
+              label="Total cholesterol (mmol/L)"
+              type="number"
+              required
+              inputProps={{ min: 0, max: 10, step: 0.1 }}
+              value={totalCholesterol}
+              onChange={(e) => setTotalCholesterol(parseFloat(e.target.value))}
+          />
+        </FormField>
+        <FormField>
+          <TextField
+              label="HDL (mmol/L)"
+              type="number"
+              required
+              inputProps={{ min: 0, max: 10, step: 0.1 }}
+              value={hdl}
+              onChange={(e) => setHdl(parseFloat(e.target.value))}
+          />
+        </FormField>
+        <FormField>
+          <TextField
             label="Ratio of total cholesterol / HDL"
             type="number"
+
             required
-            inputProps={{ min: 0, max: 1, step: 0.1 }}
-            value={tcHdl}
+            value={totalCholesterol && hdl ? totalCholesterol / hdl : ''}
           />
         </FormField>
         <FormField>
@@ -83,7 +123,9 @@ export default function Form(props: Props) {
             label="Systolic blood pressure (mm Hg)"
             type="number"
             required
-            inputProps={{ min: 0 }}
+            inputProps={{ min: 0, max: 250 }}
+            value={systolicBP}
+            onChange={(e) => setSystolicBP(parseInt(e.target.value))}
           />
         </FormField>
         <FormField>
@@ -91,12 +133,19 @@ export default function Form(props: Props) {
             label="New Zealand Index of Socioeconomic Deprivation score"
             type="number"
             required
-            inputProps={{ min: 0, max: 10 }}
+            inputProps={{ min: 0, max: 6 }}
+            value={nzDep}
+            onChange={(e) => setNzDep(parseFloat(e.target.value))}
           />
         </FormField>
         <FormField>
           <InputLabel id="smoking">Smoking status</InputLabel>
-          <Select label="smoking" required>
+          <Select
+              label="smoking"
+              required
+              value={smoker}
+              onChange={(e) => setSmoker(e.target.value)}
+          >
             <MenuItem value="8392000">Non-smoker</MenuItem>
             <MenuItem value="160617001">Stopped smoking</MenuItem>
             <MenuItem value="77176002">Current smoker</MenuItem>
@@ -104,14 +153,32 @@ export default function Form(props: Props) {
         </FormField>
         <FormField>
           <FormControlLabel
+              label="Diabetes"
+              control={
+                  <Switch
+                      checked={diabetes}
+                      onChange={(e) => setDiabetes(e.target.checked)}
+                  />}
+          />
+        </FormField>
+        <FormField>
+          <FormControlLabel
             label="Family history of cardiovascular disease?"
-            control={<Switch />}
+            control={
+                <Switch
+                    checked={familyHistory}
+                    onChange={(e) => setFamilyHistory(e.target.checked)}
+                />}
           />
         </FormField>
         <FormField>
           <FormControlLabel
             label="History of atrial fibrillation?"
-            control={<Switch />}
+            control={
+                <Switch
+                    checked={af}
+                    onChange={(e) => setAf(e.target.checked)}
+                />}
           />
         </FormField>
         <FormField>
@@ -120,22 +187,48 @@ export default function Form(props: Props) {
         <FormField>
           <FormControlLabel
             label="Currently taking blood pressure lowering medication?"
-            control={<Switch />}
+            control={
+                <Switch
+                checked={obplm}
+                onChange={(e) => setObplm(e.target.checked)}
+            />}
           />
         </FormField>
         <FormField>
           <FormControlLabel
             label="Currently taking lipid lowering medication?"
-            control={<Switch />}
+            control={
+                <Switch
+                checked={ollm}
+                onChange={(e) => setOllm(e.target.checked)}
+            />}
           />
         </FormField>
         <FormField>
           <FormControlLabel
             label="Currently taking anti-thrombotic medication?"
-            control={<Switch />}
+            control={
+                <Switch
+                checked={oatm}
+                onChange={(e) => setOatm(e.target.checked)}
+            />}
           />
         </FormField>
-        {/*<Result params={params} />*/}
+        {<Result params={{
+          birthSex,
+          age,
+          ethnicity,
+          totalCholesterol,
+          hdl,
+          systolicBP,
+          nzDep,
+          smoker,
+          familyHistory,
+          af,
+          diabetes,
+          obplm,
+          ollm,
+          oatm}} />}
       </Stack>
     </Container>
   );

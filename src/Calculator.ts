@@ -1,3 +1,6 @@
+import {MenuItem} from "@mui/material";
+import * as React from "react";
+
 interface ICVDEthnicityCoefficients {
   maori: number;
   pacific: number;
@@ -102,7 +105,121 @@ export interface CVDRiskCalculatorParams {
   obplm?: boolean;
   ollm?: boolean;
   oatm?: boolean;
+};
+
+export interface NewCVDRiskCalculatorParams {
+  birthSex?: string | null;  // snomed code of birth sex
+  age?: number | null;  // age in years
+  ethnicity?: string | null;
+  totalCholesterol?: number | null;
+  hdl?: number | null;
+  systolicBP?: number | null;
+  nzDep?: number | null;
+  smoker?: string | null; // snomed code of smoking status
+  familyHistory?: boolean;
+  af?: boolean;
+  diabetes?: boolean;
+  obplm?: boolean;
+  ollm?: boolean;
+  oatm?: boolean;
 }
+
+
+const NewCalculator = (
+    {
+      birthSex,
+      age,
+      ethnicity,
+      totalCholesterol,
+      hdl,
+      systolicBP,
+      nzDep,
+      smoker,
+      familyHistory,
+      af,
+      diabetes,
+      obplm,
+      ollm,
+      oatm,
+    } : NewCVDRiskCalculatorParams
+) : number | null => {
+  const coeff = "248153007" === birthSex ? maleCoefficients : "248152002" === birthSex ? femaleCoefficients : null;
+  if ( coeff === null){
+    return null;
+  }
+
+  const tcHdl = (totalCholesterol && hdl) ?  totalCholesterol / hdl : undefined;
+  // use means to normalise values
+  const tcHdlOffset = tcHdl !== undefined ? tcHdl - coeff.tcHdlMean : undefined;
+
+  const ageOffset =
+      age !== undefined && age !== null
+          ? Math.max(age, 35.0) - coeff.ageMean
+          : undefined;
+  const nzDepOffset =
+      nzDep !== undefined && nzDep !== null ? nzDep - coeff.nzdMean : undefined;
+  const sbpOffset =
+      systolicBP !== undefined && systolicBP !== null
+          ? systolicBP - coeff.sbpMean
+          : undefined;
+
+  // work out the sum of coefiicients
+  let sumOfCoeffs = 0.0;
+
+  if (ageOffset !== undefined) {
+    sumOfCoeffs += coeff.cAge * ageOffset;
+  }
+  if (nzDepOffset !== undefined) {
+    sumOfCoeffs += coeff.cNZDep * nzDepOffset;
+  }
+  if (sbpOffset !== undefined) {
+    sumOfCoeffs += coeff.cSBP * sbpOffset;
+    if (ageOffset !== undefined) {
+      sumOfCoeffs += coeff.cAgeSBP * ageOffset * sbpOffset;
+    }
+  }
+  if (tcHdlOffset !== undefined) {
+    sumOfCoeffs += coeff.cTcHdl * tcHdlOffset;
+  }
+  // can't be smoker and ex-smoker
+  if ("77176002" === smoker) {
+    sumOfCoeffs += coeff.cSmoker;
+  } else if ("160617001" === smoker) {
+    sumOfCoeffs += coeff.cExSmoker;
+  }
+  if (diabetes) {
+    sumOfCoeffs += coeff.cDiabetes;
+    if (ageOffset !== undefined) {
+      sumOfCoeffs += coeff.cAgeDiabetes * ageOffset;
+    }
+  }
+  if (obplm) {
+    sumOfCoeffs += coeff.cOBPLM;
+    if (sbpOffset !== undefined) {
+      sumOfCoeffs += coeff.cObplmSBP * sbpOffset;
+    }
+  }
+  if (ollm) {
+    sumOfCoeffs += coeff.cOLLM;
+  }
+  if (oatm) {
+    sumOfCoeffs += coeff.cOATM;
+  }
+  if (familyHistory) {
+    sumOfCoeffs += coeff.cFamilyHist;
+  }
+  if (af) {
+    sumOfCoeffs += coeff.cAF;
+  }
+
+  if (ethnicity && ethnicity in coeff.cEthnicity) {
+    sumOfCoeffs +=
+        coeff.cEthnicity[ethnicity as keyof ICVDEthnicityCoefficients];
+  }
+  return (1.0 - Math.pow(coeff.baseSurvival, Math.exp(sumOfCoeffs))) * 100.0;
+
+}
+
 
 const Calculator = (
   {
@@ -120,7 +237,7 @@ const Calculator = (
     obplm,
     ollm,
     oatm,
-  }: CVDRiskCalculatorParams // on antithrombotic medicine
+  }: CVDRiskCalculatorParams
 ): number => {
   const coeff = isMale ? maleCoefficients : femaleCoefficients;
 
@@ -195,4 +312,4 @@ const Calculator = (
   return (1.0 - Math.pow(coeff.baseSurvival, Math.exp(sumOfCoeffs))) * 100.0;
 };
 
-export default Calculator;
+export default NewCalculator;

@@ -7,7 +7,7 @@ import {
   PatientGenderKind,
 } from "@ahryman40k/ts-fhir-types/lib/R4";
 import moment from "moment";
-import { CVDRiskCalculatorParams } from "./Calculator";
+import {CVDRiskCalculatorParams, NewCVDRiskCalculatorParams} from "./Calculator";
 
 interface Props {
   client: Client;
@@ -19,8 +19,21 @@ interface SourceData {
   cholesterol: IObservation[];
 }
 
-export interface PrefilledParams extends CVDRiskCalculatorParams {
+export interface PrefilledParams extends NewCVDRiskCalculatorParams {
   birthSex?: string | null;
+  age?: number | null;  // age in years
+  ethnicity?: string | null;
+  totalCholesterol?: number | null;
+  hdl?: number | null;
+  systolicBP?: number | null;
+  nzDep?: number | null;
+  smoker?: string | null; // snomed code of smoking status
+  familyHistory?: boolean;
+  af?: boolean;
+  diabetes?: boolean;
+  obplm?: boolean;
+  ollm?: boolean;
+  oatm?: boolean;
 }
 
 const BIRTH_SEX_URL =

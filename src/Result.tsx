@@ -1,14 +1,14 @@
-import Calculator, { CVDRiskCalculatorParams } from "./Calculator";
 import { Card, Stack } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import * as React from "react";
+import NewCalculator, {NewCVDRiskCalculatorParams} from "./Calculator";
 
 interface Props {
-  params: CVDRiskCalculatorParams;
+  params: NewCVDRiskCalculatorParams;
 }
 
 export default function Result(props: Props) {
-  const result = Calculator(props.params),
+  const result = NewCalculator(props.params),
     formatted = result
       ? Intl.NumberFormat("en", {
           useGrouping: false,
