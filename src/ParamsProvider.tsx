@@ -17,6 +17,7 @@ interface Props {
 interface SourceData {
   patient: IPatient;
   cholesterol: IObservation[];
+  bloodPressure: IObservation[];
 }
 
 export interface PrefilledParams extends NewCVDRiskCalculatorParams {
@@ -39,6 +40,24 @@ export interface PrefilledParams extends NewCVDRiskCalculatorParams {
 const BIRTH_SEX_URL =
   "http://hl7.org.au/fhir/StructureDefinition/au-sexassignedatbirth";
 
+const TOTAL_CHOLESTEROL_CODE = "14647-2";
+const HDL_CODE = "14646-4";
+
+const BLOOD_PRESSURE_CODINGS = [
+  {
+    system: "http://snomed.info/sct",
+    code: "163035008",
+  },
+  {
+    system: "http://loinc.org",
+    code: "55284-4",
+  },
+  {
+    system: "http://loinc.org",
+    code: "85354-9",
+  },
+];
+
 export const CVDParamsContext = createContext<Promise<PrefilledParams> | null>(
   null
 );
@@ -55,26 +74,53 @@ export default function ParamsProvider(props: Props) {
   );
 }
 
-const TOTAL_CHOLESTEROL_CODE = "14647-2";
-const HDL_CODE = "14646-4";
-
 async function getSourceData(client: Client): Promise<SourceData> {
-  const patient = await client.patient.read();
-  const cholesterolBundle = await client.request<IBundle>(
+  const patient = await getPatient(client);
+  return {
+    patient: patient,
+    cholesterol: await getCholesterol(client, patient),
+    bloodPressure: await getBloodPressure(client, patient),
+  };
+}
+
+async function getPatient(client: Client): Promise<IPatient> {
+  return await client.patient.read();
+}
+
+async function getCholesterol(
+  client: Client,
+  patient: IPatient
+): Promise<IObservation[]> {
+  const bundle = await client.request<IBundle>(
     `/Observation?_sort=-effectiveDateTime&patient=${patient.id}&_count=2&` +
       "code=http%3A%2F%2Floinc.org%7C" +
       TOTAL_CHOLESTEROL_CODE +
       ",http%3A%2F%2Floinc.org%7C" +
       HDL_CODE
   );
-  return {
-    patient: patient,
-    cholesterol: cholesterolBundle.entry
-      ? cholesterolBundle.entry
-          .filter((entry) => entry.resource)
-          .map((entry) => entry.resource as IObservation)
-      : [],
-  };
+  return bundle.entry
+    ? bundle.entry
+        .filter((entry) => entry.resource)
+        .map((entry) => entry.resource as IObservation)
+    : [];
+}
+
+async function getBloodPressure(
+  client: Client,
+  patient: IPatient
+): Promise<IObservation[]> {
+  const codeCondition = BLOOD_PRESSURE_CODINGS.map(
+      (coding) => `${coding.system}|${coding.code}`
+    ).join(","),
+    bundle = await client.request<IBundle>(
+      `/Observation?_sort=-effectiveDateTime&patient=${patient.id}&_count=1&code=` +
+        codeCondition
+    );
+  return bundle.entry
+    ? bundle.entry
+        .filter((entry) => entry.resource)
+        .map((entry) => entry.resource as IObservation)
+    : [];
 }
 
 function extractParams(sourceData: SourceData) {
@@ -83,6 +129,7 @@ function extractParams(sourceData: SourceData) {
     birthSex: birthSex(sourceData.patient),
     age: age(sourceData.patient),
     ...tcHdlData,
+    systolicBP: systolicBP(sourceData.bloodPressure),
   };
 }
 
@@ -143,4 +190,25 @@ function tcHdl(
     return null;
   }
   return { hdl: hdlValue, totalCholesterol: totalValue };
+}
+
+function systolicBP(bloodPressure: IObservation[]): number | null {
+  if (bloodPressure.length !== 1) {
+    return null;
+  }
+  const bpObservation = bloodPressure[0],
+    systolicComponent = bpObservation.component?.find((component) => {
+      const coding = component.code?.coding;
+      if (!coding) {
+        return false;
+      }
+      const validCoding = coding.find(
+        (c) =>
+          (c.system === "http://loinc.org" && c.code === "8459-0") ||
+          (c.system === "http://loinc.org" && c.code === "8480-6")
+      );
+      const correctUnit = component.valueQuantity?.unit === "mmHg";
+      return validCoding && correctUnit;
+    });
+  return systolicComponent?.valueQuantity?.value ?? null;
 }
