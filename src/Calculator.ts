@@ -87,33 +87,56 @@ const femaleCoefficients: ICVDCoefficients = {
   cObplmSBP: -0.004313,
 };
 
-const CVDRiskCalculator = (
-    isMale: boolean,
-    age: number,
-    ethnicity: string, // one of [european, maori, pacific, indian, asian]
-    tcHdl: number, // ratio of total cholesterol and HDL (totalCholesterol / HDL)
-    systolicBP: number,
-    nzDep: number, // New Zealand Index of Socioeconomic Depreivation
-    exSmoker: boolean, // not sure how long ago to give up smoker for this to count.
-    smoker: boolean,
-    familyHistory: boolean, // family history of cardiovascular disease
-    af: boolean, // Atrial Fibrillation, again not sure how this applies
-    diabetes: boolean,
-    obplm: boolean, // on blood pressure lowering medicine
-    ollm: boolean, // on lipid lowering medicine
-    oatm: boolean // on antithrombotic medicine
+export interface CVDRiskCalculatorParams {
+  isMale?: boolean;
+  age?: number;
+  ethnicity?: string;
+  tcHdl?: number;
+  systolicBP?: number;
+  nzDep?: number;
+  exSmoker?: boolean;
+  smoker?: boolean;
+  familyHistory?: boolean;
+  af?: boolean;
+  diabetes?: boolean;
+  obplm?: boolean;
+  ollm?: boolean;
+  oatm?: boolean;
+}
+
+const Calculator = (
+  {
+    isMale,
+    age,
+    ethnicity,
+    tcHdl,
+    systolicBP,
+    nzDep,
+    exSmoker,
+    smoker,
+    familyHistory,
+    af,
+    diabetes,
+    obplm,
+    ollm,
+    oatm,
+  }: CVDRiskCalculatorParams // on antithrombotic medicine
 ): number => {
   const coeff = isMale ? maleCoefficients : femaleCoefficients;
-
 
   // use means to normalise values
   const tcHdlOffset = tcHdl !== undefined ? tcHdl - coeff.tcHdlMean : undefined;
 
   const ageOffset =
-      age !== undefined && age !== null ? Math.max(age, 35.0) - coeff.ageMean : undefined;
-  const nzDepOffset = nzDep !== undefined && nzDep !== null ? nzDep - coeff.nzdMean : undefined;
+    age !== undefined && age !== null
+      ? Math.max(age, 35.0) - coeff.ageMean
+      : undefined;
+  const nzDepOffset =
+    nzDep !== undefined && nzDep !== null ? nzDep - coeff.nzdMean : undefined;
   const sbpOffset =
-      systolicBP !== undefined && systolicBP !== null ? systolicBP - coeff.sbpMean : undefined;
+    systolicBP !== undefined && systolicBP !== null
+      ? systolicBP - coeff.sbpMean
+      : undefined;
 
   // work out the sum of coefiicients
   let sumOfCoeffs = 0;
@@ -165,9 +188,10 @@ const CVDRiskCalculator = (
   }
 
   if (ethnicity && ethnicity in coeff.cEthnicity) {
-    sumOfCoeffs += coeff.cEthnicity[ethnicity as keyof ICVDEthnicityCoefficients];
+    sumOfCoeffs +=
+      coeff.cEthnicity[ethnicity as keyof ICVDEthnicityCoefficients];
   }
   return (1.0 - Math.pow(coeff.baseSurvival, Math.exp(sumOfCoeffs))) * 100.0;
 };
 
-export default CVDRiskCalculator;
+export default Calculator;

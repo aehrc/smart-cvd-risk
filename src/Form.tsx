@@ -12,23 +12,22 @@ import {
   Stack,
   TextField,
 } from "@mui/material";
-import { IPatient, PatientGenderKind } from "@ahryman40k/ts-fhir-types/lib/R4";
-import moment from "moment";
+import { CVDRiskCalculatorParams } from "./Calculator";
+import { useState } from "react";
+import { PrefilledParams } from "./ParamsProvider";
 
 interface Props {
-  patient: IPatient;
+  initialParams?: PrefilledParams;
 }
 
-export default function App(props: Props) {
-  const { patient } = props,
-    birthSexIsMale = patient.gender === PatientGenderKind._male,
-    age = moment().diff(patient.birthDate, "years");
+export default function Form(props: Props) {
+  const { initialParams } = props,
+    [birthSex, setBirthSex] = useState(initialParams?.birthSex),
+    [age, setAge] = useState(initialParams?.age ?? undefined);
 
   const FormField = (props: { children: any }) => (
     <FormControl fullWidth>{props.children}</FormControl>
   );
-
-  console.log("Patient", patient);
 
   return (
     <Container maxWidth="sm">
@@ -38,7 +37,12 @@ export default function App(props: Props) {
         </Typography>
         <FormField>
           <InputLabel id="birth-sex">Biological sex at birth</InputLabel>
-          <Select label="birth-sex" required>
+          <Select
+            label="birth-sex"
+            required
+            value={birthSex}
+            onChange={(e) => setBirthSex(e.target.value)}
+          >
             <MenuItem value="248152002">Female</MenuItem>
             <MenuItem value="248153007">Male</MenuItem>
             <MenuItem value="32570691000036108">Intersex</MenuItem>
@@ -46,7 +50,13 @@ export default function App(props: Props) {
           </Select>
         </FormField>
         <FormField>
-          <TextField label="Age in years" type="number" value={age} required />
+          <TextField
+            label="Age in years"
+            type="number"
+            value={age}
+            required
+            onChange={(e) => setAge(parseInt(e.target.value))}
+          />
         </FormField>
         <FormField>
           <InputLabel id="ethnicity">Ethnicity</InputLabel>
@@ -129,7 +139,9 @@ export default function App(props: Props) {
             <Typography variant="h6" component="h2" sx={{ flexGrow: 1 }}>
               Calculated risk score
             </Typography>
-            <Typography color="primary">(not enough information)</Typography>
+            <Typography color="primary" sx={{ textAlign: "right" }}>
+              (not enough information)
+            </Typography>
           </Stack>
         </Card>
       </Stack>

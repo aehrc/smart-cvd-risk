@@ -1,4 +1,4 @@
-# Create React App example
+# Create React Form example
 
 ## How to use
 
@@ -28,7 +28,7 @@ or:
 
 <!-- #default-branch-switch -->
 
-This example demonstrates how you can use [Create React App](https://github.com/facebookincubator/create-react-app).
+This example demonstrates how you can use [Create React Form](https://github.com/facebookincubator/create-react-app).
 It includes `@mui/material` and its peer dependencies, including `emotion`, the default style engine in MUI v5.
 If you prefer, you can [use styled-components instead](https://mui.com/guides/interoperability/#styled-components).
 
