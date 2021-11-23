@@ -7,7 +7,7 @@ import {
   PatientGenderKind,
 } from "@ahryman40k/ts-fhir-types/lib/R4";
 import moment from "moment";
-import {CVDRiskCalculatorParams, NewCVDRiskCalculatorParams} from "./Calculator";
+import { NewCVDRiskCalculatorParams } from "./Calculator";
 
 interface Props {
   client: Client;
@@ -21,7 +21,7 @@ interface SourceData {
 
 export interface PrefilledParams extends NewCVDRiskCalculatorParams {
   birthSex?: string | null;
-  age?: number | null;  // age in years
+  age?: number | null; // age in years
   ethnicity?: string | null;
   totalCholesterol?: number | null;
   hdl?: number | null;
@@ -78,10 +78,11 @@ async function getSourceData(client: Client): Promise<SourceData> {
 }
 
 function extractParams(sourceData: SourceData) {
+  let tcHdlData = tcHdl(sourceData.cholesterol);
   return {
     birthSex: birthSex(sourceData.patient),
     age: age(sourceData.patient),
-    tcHdl: tcHdl(sourceData.cholesterol),
+    ...tcHdlData,
   };
 }
 
@@ -113,7 +114,9 @@ function age(patient: IPatient): number {
   return moment().diff(patient.birthDate, "years");
 }
 
-function tcHdl(cholesterol: IObservation[]): number | null {
+function tcHdl(
+  cholesterol: IObservation[]
+): { hdl: number; totalCholesterol: number } | null {
   if (cholesterol.length !== 2) {
     return null;
   }
@@ -139,5 +142,5 @@ function tcHdl(cholesterol: IObservation[]): number | null {
   ) {
     return null;
   }
-  return hdlValue / totalValue;
+  return { hdl: hdlValue, totalCholesterol: totalValue };
 }
