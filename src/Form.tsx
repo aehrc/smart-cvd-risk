@@ -139,7 +139,7 @@ export default function Form(props: Props) {
         </FormControl>
         <FormControl fullWidth>
           <FormControlLabel
-            label="Diabetes"
+            label="History of diabetes?"
             control={
               <Switch
                 checked={diabetes}
@@ -166,9 +166,6 @@ export default function Form(props: Props) {
               <Switch checked={af} onChange={(e) => setAf(e.target.checked)} />
             }
           />
-        </FormControl>
-        <FormControl fullWidth>
-          <FormControlLabel label="History of diabetes?" control={<Switch />} />
         </FormControl>
         <FormControl fullWidth>
           <FormControlLabel
