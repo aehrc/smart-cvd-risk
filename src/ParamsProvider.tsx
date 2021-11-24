@@ -55,6 +55,8 @@ const DIABETES_VALUE_SET_URI =
   "http://snomed.info/sct?fhir_vs=ecl/%3C%3C%2073211009%20";
 const CARDIOVASCULAR_VALUE_SET_URI =
   "http://snomed.info/sct?fhir_vs=ecl/%3C%3C%2049601007%20";
+const AF_VALUE_SET_URI =
+  "http://snomed.info/sct?fhir_vs=ecl/%3C%3C%2049436004%20";
 
 const BLOOD_PRESSURE_CODINGS = [
   {
@@ -201,7 +203,7 @@ async function getSmoker(
     : [];
 }
 
-async function extractParams(sourceData: SourceData) {
+async function extractParams(sourceData: SourceData): Promise<PrefilledParams> {
   let tcHdlData = tcHdl(sourceData.cholesterol);
   return {
     birthSex: birthSex(sourceData.patient),
@@ -209,7 +211,11 @@ async function extractParams(sourceData: SourceData) {
     ...tcHdlData,
     systolicBP: systolicBP(sourceData.bloodPressure),
     diabetes: await diabetes(sourceData.history),
-    cardiovascular: await cardiovascular(sourceData.familyHistory),
+    familyHistory: await historyInValueSet(
+      sourceData.familyHistory,
+      CARDIOVASCULAR_VALUE_SET_URI
+    ),
+    af: await historyInValueSet(sourceData.familyHistory, AF_VALUE_SET_URI),
     smoker: smoker(sourceData.smoker),
   };
 }
@@ -309,13 +315,12 @@ async function diabetes(history: ICondition[]): Promise<boolean> {
   });
 }
 
-async function cardiovascular(
-    familyHistory: IFamilyMemberHistory[]
+async function historyInValueSet(
+  familyHistory: IFamilyMemberHistory[],
+  valueSetUri: string
 ): Promise<boolean> {
   const txClient = new TerminologyClient(TX_ENDPOINT),
-      diabetesCodings = await txClient.expandValueSet(
-          CARDIOVASCULAR_VALUE_SET_URI
-      );
+    validCodings = await txClient.expandValueSet(valueSetUri);
 
   return familyHistory.some((familyHistory) => {
     const conditions = familyHistory.condition;
@@ -327,11 +332,11 @@ async function cardiovascular(
         return false;
       }
       return condition.code.coding.find((conditionCoding) =>
-          diabetesCodings.find(
-              (c) =>
-                  c.system === conditionCoding.system &&
-                  c.code === conditionCoding.code
-          )
+        validCodings.find(
+          (c) =>
+            c.system === conditionCoding.system &&
+            c.code === conditionCoding.code
+        )
       );
     });
   });
