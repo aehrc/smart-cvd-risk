@@ -260,7 +260,7 @@ function systolicBP(bloodPressure: IObservation[]): number | null {
 
 async function diabetes(history: ICondition[]): Promise<boolean> {
   const txClient = new TerminologyClient(TX_ENDPOINT),
-      diabetesCodings = await txClient.snomedIsA(DIABETES_SNOMED_CODE);
+    diabetesCodings = await txClient.expandValueSet(DIABETES_VALUE_SET_URI);
 
   return history.some((condition) => {
     const coding = condition.code?.coding;
@@ -268,7 +268,7 @@ async function diabetes(history: ICondition[]): Promise<boolean> {
       return false;
     }
     return !!coding.find((c) =>
-        diabetesCodings.find((dc) => dc.system === c.system && dc.code === c.code)
+      diabetesCodings.find((dc) => dc.system === c.system && dc.code === c.code)
     );
   });
 }
