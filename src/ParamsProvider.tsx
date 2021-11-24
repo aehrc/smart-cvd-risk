@@ -52,6 +52,8 @@ const TOTAL_CHOLESTEROL_LOINC_CODE = "14647-2";
 const HDL_LOINC_CODE = "14646-4";
 const DIABETES_VALUE_SET_URI =
   "http://snomed.info/sct?fhir_vs=ecl/%3C%3C%2073211009%20";
+const CARDIOVASCULAR_VALUE_SET_URI =
+  "http://snomed.info/sct?fhir_vs=ecl/%3C%3C%2049601007%20";
 
 const BLOOD_PRESSURE_CODINGS = [
   {
@@ -171,6 +173,7 @@ async function extractParams(sourceData: SourceData) {
     ...tcHdlData,
     systolicBP: systolicBP(sourceData.bloodPressure),
     diabetes: await diabetes(sourceData.history),
+    cardiovascular: await cardiovascular(sourceData.familyHistory),
   };
 }
 
@@ -266,5 +269,33 @@ async function diabetes(history: ICondition[]): Promise<boolean> {
     return !!coding.find((c) =>
       diabetesCodings.find((dc) => dc.system === c.system && dc.code === c.code)
     );
+  });
+}
+
+async function cardiovascular(
+  familyHistory: IFamilyMemberHistory[]
+): Promise<boolean> {
+  const txClient = new TerminologyClient(TX_ENDPOINT),
+    diabetesCodings = await txClient.expandValueSet(
+      CARDIOVASCULAR_VALUE_SET_URI
+    );
+
+  return familyHistory.some((familyHistory) => {
+    const conditions = familyHistory.condition;
+    if (!conditions) {
+      return false;
+    }
+    return !!conditions.find((condition) => {
+      if (!condition.code.coding) {
+        return false;
+      }
+      return condition.code.coding.find((conditionCoding) =>
+        diabetesCodings.find(
+          (c) =>
+            c.system === conditionCoding.system &&
+            c.code === conditionCoding.code
+        )
+      );
+    });
   });
 }
