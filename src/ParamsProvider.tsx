@@ -210,12 +210,15 @@ async function extractParams(sourceData: SourceData): Promise<PrefilledParams> {
     age: age(sourceData.patient),
     ...tcHdlData,
     systolicBP: systolicBP(sourceData.bloodPressure),
-    diabetes: await diabetes(sourceData.history),
-    familyHistory: await historyInValueSet(
+    diabetes: await historyInValueSet(
+      sourceData.history,
+      DIABETES_VALUE_SET_URI
+    ),
+    familyHistory: await familyHistoryInValueSet(
       sourceData.familyHistory,
       CARDIOVASCULAR_VALUE_SET_URI
     ),
-    af: await historyInValueSet(sourceData.familyHistory, AF_VALUE_SET_URI),
+    af: await historyInValueSet(sourceData.history, AF_VALUE_SET_URI),
     smoker: smoker(sourceData.smoker),
   };
 }
@@ -300,9 +303,12 @@ function systolicBP(bloodPressure: IObservation[]): number | null {
   return systolicComponent?.valueQuantity?.value ?? null;
 }
 
-async function diabetes(history: ICondition[]): Promise<boolean> {
+async function historyInValueSet(
+  history: ICondition[],
+  valueSetUri: string
+): Promise<boolean> {
   const txClient = new TerminologyClient(TX_ENDPOINT),
-    diabetesCodings = await txClient.expandValueSet(DIABETES_VALUE_SET_URI);
+    diabetesCodings = await txClient.expandValueSet(valueSetUri);
 
   return history.some((condition) => {
     const coding = condition.code?.coding;
@@ -315,7 +321,7 @@ async function diabetes(history: ICondition[]): Promise<boolean> {
   });
 }
 
-async function historyInValueSet(
+async function familyHistoryInValueSet(
   familyHistory: IFamilyMemberHistory[],
   valueSetUri: string
 ): Promise<boolean> {
