@@ -2,12 +2,15 @@ import Client from "fhirclient/lib/Client";
 import { createContext, useMemo } from "react";
 import {
   IBundle,
+  ICondition,
+  IFamilyMemberHistory,
   IObservation,
   IPatient,
   PatientGenderKind,
 } from "@ahryman40k/ts-fhir-types/lib/R4";
 import moment from "moment";
 import { NewCVDRiskCalculatorParams } from "./Calculator";
+import TerminologyClient from "./TxClient";
 
 interface Props {
   client: Client;
@@ -18,6 +21,8 @@ interface SourceData {
   patient: IPatient;
   cholesterol: IObservation[];
   bloodPressure: IObservation[];
+  history: ICondition[];
+  familyHistory: IFamilyMemberHistory[];
 }
 
 export interface PrefilledParams extends NewCVDRiskCalculatorParams {
@@ -40,12 +45,16 @@ export interface PrefilledParams extends NewCVDRiskCalculatorParams {
 const BIRTH_SEX_URL =
   "http://hl7.org.au/fhir/StructureDefinition/au-sexassignedatbirth";
 
-const TOTAL_CHOLESTEROL_CODE = "14647-2";
-const HDL_CODE = "14646-4";
+const TX_ENDPOINT = "https://r4.ontoserver.csiro.au/fhir";
+
+const SNOMED_URI = "http://snomed.info/sct";
+const TOTAL_CHOLESTEROL_LOINC_CODE = "14647-2";
+const HDL_LOINC_CODE = "14646-4";
+const DIABETES_SNOMED_CODE = "73211009";
 
 const BLOOD_PRESSURE_CODINGS = [
   {
-    system: "http://snomed.info/sct",
+    system: SNOMED_URI,
     code: "163035008",
   },
   {
@@ -80,6 +89,8 @@ async function getSourceData(client: Client): Promise<SourceData> {
     patient: patient,
     cholesterol: await getCholesterol(client, patient),
     bloodPressure: await getBloodPressure(client, patient),
+    history: await getHistory(client, patient),
+    familyHistory: await getFamilyHistory(client, patient),
   };
 }
 
@@ -94,9 +105,9 @@ async function getCholesterol(
   const bundle = await client.request<IBundle>(
     `/Observation?_sort=-effectiveDateTime&patient=${patient.id}&_count=2&` +
       "code=http%3A%2F%2Floinc.org%7C" +
-      TOTAL_CHOLESTEROL_CODE +
+      TOTAL_CHOLESTEROL_LOINC_CODE +
       ",http%3A%2F%2Floinc.org%7C" +
-      HDL_CODE
+      HDL_LOINC_CODE
   );
   return bundle.entry
     ? bundle.entry
@@ -123,13 +134,42 @@ async function getBloodPressure(
     : [];
 }
 
-function extractParams(sourceData: SourceData) {
+async function getHistory(
+  client: Client,
+  patient: IPatient
+): Promise<ICondition[]> {
+  const bundle = await client.request<IBundle>(
+    `/Condition?patient=${patient.id}`
+  );
+  return bundle.entry
+    ? bundle.entry
+        .filter((entry) => entry.resource)
+        .map((entry) => entry.resource as ICondition)
+    : [];
+}
+
+async function getFamilyHistory(
+  client: Client,
+  patient: IPatient
+): Promise<IFamilyMemberHistory[]> {
+  const bundle = await client.request<IBundle>(
+    `/FamilyMemberHistory?patient=${patient.id}`
+  );
+  return bundle.entry
+    ? bundle.entry
+        .filter((entry) => entry.resource)
+        .map((entry) => entry.resource as IFamilyMemberHistory)
+    : [];
+}
+
+async function extractParams(sourceData: SourceData) {
   let tcHdlData = tcHdl(sourceData.cholesterol);
   return {
     birthSex: birthSex(sourceData.patient),
     age: age(sourceData.patient),
     ...tcHdlData,
     systolicBP: systolicBP(sourceData.bloodPressure),
+    diabetes: await diabetes(sourceData.history),
   };
 }
 
@@ -211,4 +251,19 @@ function systolicBP(bloodPressure: IObservation[]): number | null {
       return validCoding && correctUnit;
     });
   return systolicComponent?.valueQuantity?.value ?? null;
+}
+
+async function diabetes(history: ICondition[]): Promise<boolean> {
+  const txClient = new TerminologyClient(TX_ENDPOINT),
+    diabetesCodings = await txClient.snomedIsA(DIABETES_SNOMED_CODE);
+
+  return history.some((condition) => {
+    const coding = condition.code?.coding;
+    if (!coding) {
+      return false;
+    }
+    return !!coding.find((c) =>
+      diabetesCodings.find((dc) => dc.system === c.system && dc.code === c.code)
+    );
+  });
 }

@@ -17,6 +17,7 @@
     "@mui/material": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",
+    "axios": "^0.24.0",
     "fhirclient": "2.4.0",
     "moment": "^2.29.1",
     "prettier": "^2.4.1",
