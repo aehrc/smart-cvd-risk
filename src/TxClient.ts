@@ -13,9 +13,9 @@ export default class TerminologyClient {
     });
   }
 
-  async snomedIsA(conceptId: string): Promise<ICoding[]> {
+  async expandValueSet(url: string): Promise<ICoding[]> {
     const response = await this.client.get<IValueSet>(
-      `/ValueSet/$expand?url=http://snomed.info/sct?fhir_vs=ecl/%3C%3C%20${conceptId}%20`
+      `/ValueSet/$expand?url=${url}`
     );
     return response.data.expansion?.contains ?? [];
   }

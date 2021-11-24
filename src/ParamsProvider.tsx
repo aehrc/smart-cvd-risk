@@ -51,7 +51,8 @@ const TX_ENDPOINT = "https://r4.ontoserver.csiro.au/fhir";
 const SNOMED_URI = "http://snomed.info/sct";
 const TOTAL_CHOLESTEROL_LOINC_CODE = "14647-2";
 const HDL_LOINC_CODE = "14646-4";
-const DIABETES_SNOMED_CODE = "73211009";
+const DIABETES_VALUE_SET_URI =
+  "http://snomed.info/sct?fhir_vs=ecl/%3C%3C%2073211009%20";
 
 const BLOOD_PRESSURE_CODINGS = [
   {
