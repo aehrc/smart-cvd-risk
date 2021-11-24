@@ -8,13 +8,15 @@ import Switch from "@mui/material/Switch";
 import { InputLabel, MenuItem, Select, Stack, TextField } from "@mui/material";
 import { PrefilledParams } from "./ParamsProvider";
 import Result from "./Result";
+import Client from "fhirclient/lib/Client";
 
 interface Props {
   initialParams?: PrefilledParams;
+  client: Client;
 }
 
 export default function Form(props: Props) {
-  const { initialParams } = props,
+  const { initialParams, client } = props,
     [birthSex, setBirthSex] = useState(initialParams?.birthSex),
     [age, setAge] = useState(initialParams?.age ?? undefined),
     [totalCholesterol, setTotalCholesterol] = useState(
@@ -201,6 +203,7 @@ export default function Form(props: Props) {
           />
         </FormControl>
         <Result
+          client={client}
           params={{
             birthSex,
             age,

@@ -14,7 +14,8 @@ SMART.init({
   iss: "https://www.demo.oridashi.com.au:8102",
   redirectUri: "test.html",
   clientId: "47059543-3654-466b-9c71-495957306af0",
-  scope: "launch patient/*.read offline_access openid fhirUser",
+  scope:
+    "launch patient/*.read patient/Observation.write offline_access openid fhirUser",
 }).then(
   (client) => {
     render(
@@ -22,7 +23,7 @@ SMART.init({
         <CssBaseline />
         <ParamsProvider client={client}>
           <React.Suspense fallback={<Prefetching />}>
-            <PrefetchedForm />
+            <PrefetchedForm client={client} />
           </React.Suspense>
         </ParamsProvider>
       </ThemeProvider>,
