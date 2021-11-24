@@ -23,6 +23,7 @@ interface SourceData {
   bloodPressure: IObservation[];
   history: ICondition[];
   familyHistory: IFamilyMemberHistory[];
+  smoker: IObservation[];
 }
 
 export interface PrefilledParams extends NewCVDRiskCalculatorParams {
@@ -67,6 +68,7 @@ const BLOOD_PRESSURE_CODINGS = [
   },
 ];
 
+
 export const CVDParamsContext = createContext<Promise<PrefilledParams> | null>(
   null
 );
@@ -91,6 +93,7 @@ async function getSourceData(client: Client): Promise<SourceData> {
     bloodPressure: await getBloodPressure(client, patient),
     history: await getHistory(client, patient),
     familyHistory: await getFamilyHistory(client, patient),
+    smoker: await getSmoker(client, patient),
   };
 }
 
@@ -170,6 +173,7 @@ async function extractParams(sourceData: SourceData) {
     ...tcHdlData,
     systolicBP: systolicBP(sourceData.bloodPressure),
     diabetes: await diabetes(sourceData.history),
+    smoker: smoker(sourceData.smoker),
   };
 }
 
@@ -255,7 +259,7 @@ function systolicBP(bloodPressure: IObservation[]): number | null {
 
 async function diabetes(history: ICondition[]): Promise<boolean> {
   const txClient = new TerminologyClient(TX_ENDPOINT),
-    diabetesCodings = await txClient.snomedIsA(DIABETES_SNOMED_CODE);
+      diabetesCodings = await txClient.snomedIsA(DIABETES_SNOMED_CODE);
 
   return history.some((condition) => {
     const coding = condition.code?.coding;
@@ -263,7 +267,61 @@ async function diabetes(history: ICondition[]): Promise<boolean> {
       return false;
     }
     return !!coding.find((c) =>
-      diabetesCodings.find((dc) => dc.system === c.system && dc.code === c.code)
+        diabetesCodings.find((dc) => dc.system === c.system && dc.code === c.code)
     );
   });
+}
+
+
+const SMOKER_CODINGS = [
+  {
+    system: "http://loinc.org",
+    code: "72166-2",
+  },
+];
+const NON_SMOKER_CODES = ["8392000", "LA18978-9"];
+const STOPPED_SMOKING_CODES = ["160617001", "8517006", "LA15920-4"];
+const CURRENT_SMOKER_CODES = ["77176002", "LA18976-3", "LA18977-1", "LA18981-3", "LA18982-1"];
+
+async function getSmoker(
+      client: Client,
+      patient: IPatient
+  ): Promise<IObservation[]> {
+    const codeCondition = SMOKER_CODINGS.map(
+            (coding) => `${coding.system}|${coding.code}`
+        ).join(","),
+        bundle = await client.request<IBundle>(
+            `/Observation?_sort=-effectiveDateTime&patient=${patient.id}&_count=1&code=` +
+            codeCondition
+        );
+    return bundle.entry
+        ? bundle.entry
+            .filter((entry) => entry.resource)
+            .map((entry) => entry.resource as IObservation)
+        : [];
+  }
+
+
+
+function smoker(smokerStatus: IObservation[]):string | null {
+  if (smokerStatus.length !== 1){
+    return null;
+  }
+  const smokerObservation = smokerStatus[0];
+
+  const coding = smokerObservation.valueCodeableConcept?.coding?.find(
+      (c) =>  ((c.system === "http://loinc.org" || c.system === "http://snomed.info/sct") && c.code)
+  );
+  const code = coding?.code ?? '';
+
+  if (NON_SMOKER_CODES.includes(code)){
+    return "8392000";
+  }
+  if (STOPPED_SMOKING_CODES.includes(code)){
+    return "160617001";
+  }
+  if (CURRENT_SMOKER_CODES.includes(code)){
+    return "77176002";
+  }
+  return null;
 }
