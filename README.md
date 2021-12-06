@@ -1,40 +1,22 @@
-# Create React Form example
+## SMART CVD Risk Example App
 
-## How to use
+This is a simple example of a CVD risk calculator that uses [FHIR](https://hl7.org/fhir) and the 
+[Smart App Launch Framework](https://hl7.org/fhir/smart-app-launch/).
 
-Download the example [or clone the repo](https://github.com/mui-org/material-ui):
+It is designed to be launched from a FHIR/SMART enabled application such as an EHR. It makes a 
+series of requests to the FHIR endpoint to prefill the form with available patient data. Finally, 
+the app can write a risk score observation back into the system, again using the FHIR endpoint.
 
-<!-- #default-branch-switch -->
+It is written using [React](https://reactjs.org/) and [Material UI](https://mui.com/). You can run 
+it locally using the following commands:
 
-```sh
-curl https://codeload.github.com/mui-org/material-ui/tar.gz/master | tar -xz --strip=2 material-ui-master/examples/create-react-app
-cd create-react-app
 ```
-
-Install it and run:
-
-```sh
 npm install
 npm start
 ```
 
-or:
+This is an example only, and should not be used for any sort of production purpose.
 
-<!-- #default-branch-switch -->
-
-[![Edit on CodeSandbox](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/github/mui-org/material-ui/tree/master/examples/create-react-app)
-
-## The idea behind the example
-
-<!-- #default-branch-switch -->
-
-This example demonstrates how you can use [Create React Form](https://github.com/facebookincubator/create-react-app).
-It includes `@mui/material` and its peer dependencies, including `emotion`, the default style engine in MUI v5.
-If you prefer, you can [use styled-components instead](https://mui.com/guides/interoperability/#styled-components).
-
-## What's next?
-
-<!-- #default-branch-switch -->
-
-You now have a working example project.
-You can head back to the documentation, continuing browsing it from the [templates](https://mui.com/getting-started/templates/) section.
+Copyright © 2021, Commonwealth Scientific and Industrial Research Organisation 
+(CSIRO) ABN 41 687 119 230. Licensed under the 
+[CSIRO Open Source Software Licence Agreement](./LICENSE.md).
