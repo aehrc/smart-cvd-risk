@@ -126,7 +126,7 @@ async function getCholesterol(
   patient: IPatient
 ): Promise<IObservation[]> {
   const bundle = await client.request<IBundle>(
-    `/Observation?_sort=-effectiveDateTime&patient=${patient.id}&_count=2&` +
+    `/Observation?_sort=-date&patient=${patient.id}&_count=2&` +
       "code=http%3A%2F%2Floinc.org%7C" +
       TOTAL_CHOLESTEROL_LOINC_CODE +
       ",http%3A%2F%2Floinc.org%7C" +
@@ -147,7 +147,7 @@ async function getBloodPressure(
       (coding) => `${coding.system}|${coding.code}`
     ).join(","),
     bundle = await client.request<IBundle>(
-      `/Observation?_sort=-effectiveDateTime&patient=${patient.id}&_count=1&code=` +
+      `/Observation?_sort=-date&patient=${patient.id}&_count=1&code=` +
         codeCondition
     );
   return bundle.entry
@@ -193,7 +193,7 @@ async function getSmoker(
       (coding) => `${coding.system}|${coding.code}`
     ).join(","),
     bundle = await client.request<IBundle>(
-      `/Observation?_sort=-effectiveDateTime&patient=${patient.id}&_count=1&code=` +
+      `/Observation?_sort=-date&patient=${patient.id}&_count=1&code=` +
         codeCondition
     );
   return bundle.entry
