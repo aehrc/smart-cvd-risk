@@ -14,6 +14,10 @@ jobs:
       - name: Install dependencies
         run: npm install
       - name: Install and build
+        env:
+          REACT_APP_ISSUER: ${{ secrets.ISSUER }}
+          REACT_APP_CLIENT_ID: ${{ secrets.CLIENT_ID }}
+          REACT_APP_SCOPE: ${{ secrets.SCOPE }}
         run: npm run build
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@4.1.7

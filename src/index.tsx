@@ -11,11 +11,10 @@ import Prefetching from "./Prefetching";
 let rootElement = document.querySelector("#root");
 
 SMART.init({
-  iss: "https://www.demo.oridashi.com.au:8102",
-  redirectUri: "test.html",
-  clientId: "47059543-3654-466b-9c71-495957306af0",
-  scope:
-    "launch patient/*.read patient/Observation.write offline_access openid fhirUser",
+  iss: process.env.REACT_APP_ISSUER ?? "https://www.demo.oridashi.com.au:8102",
+  redirectUri: "index.html",
+  clientId: process.env.REACT_APP_CLIENT_ID ?? "a2317248-5ee1-44f5-9098-73e1c5db4b32",
+  scope: process.env.REACT_APP_SCOPE ?? "launch/patient patient/*.read patient/Observation.write offline_access openid fhirUser",
 }).then(
   (client) => {
     render(
