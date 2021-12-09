@@ -1,5 +1,9 @@
 ## SMART CVD Risk Example App
 
+See it in action at: https://aehrc.github.io/smart-cvd-risk/
+
+Edit it on CodeSandbox: https://codesandbox.io/s/github/aehrc/smart-cvd-risk
+
 This is a simple example of a CVD risk calculator that uses [FHIR](https://hl7.org/fhir) and the 
 [Smart App Launch Framework](https://hl7.org/fhir/smart-app-launch/).
 
