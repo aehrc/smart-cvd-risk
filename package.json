@@ -1,7 +1,28 @@
 {
-  "name": "cardiovascular-risk-calculator",
+  "name": "smart-cvd-risk",
+  "description": "An example of a cardiovascular risk calculator implemented as a FHIR Smart App.",
+  "keywords": [
+    "react",
+    "material-ui",
+    "fhir",
+    "smart-on-fhir"
+  ],
+  "author": {
+    "name": "Australian e-Health Research Centre, CSIRO",
+    "url": "https://aehrc.csiro.au"
+  },
+  "contributors": [
+    {
+      "name": "John Grimes",
+      "url": "https://github.com/johngrimes"
+    },
+    {
+      "name": "David Conlan",
+      "url": "https://github.com/dconlan"
+    }
+  ],
   "version": "0.1.0",
-  "license": " Apache-2.0",
+  "license": "SEE LICENSE IN LICENSE.md",
   "main": "src/index.tsx",
   "scripts": {
     "start": "HTTPS=true react-scripts start",
@@ -43,7 +64,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "keywords": [],
-  "description": ""
+  }
 }
