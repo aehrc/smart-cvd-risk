@@ -1,6 +1,3 @@
-import {MenuItem} from "@mui/material";
-import * as React from "react";
-
 interface ICVDEthnicityCoefficients {
   maori: number;
   pacific: number;
@@ -88,26 +85,8 @@ const femaleCoefficients: ICVDCoefficients = {
   cAgeDiabetes: -0.0222549,
   cAgeSBP: -0.0004425,
   cObplmSBP: -0.004313,
-};
-
+}
 export interface CVDRiskCalculatorParams {
-  isMale?: boolean;
-  age?: number;
-  ethnicity?: string;
-  tcHdl?: number | null;
-  systolicBP?: number;
-  nzDep?: number;
-  exSmoker?: boolean;
-  smoker?: boolean;
-  familyHistory?: boolean;
-  af?: boolean;
-  diabetes?: boolean;
-  obplm?: boolean;
-  ollm?: boolean;
-  oatm?: boolean;
-};
-
-export interface NewCVDRiskCalculatorParams {
   birthSex?: string | null;  // snomed code of birth sex
   age?: number | null;  // age in years
   ethnicity?: string | null;
@@ -125,7 +104,7 @@ export interface NewCVDRiskCalculatorParams {
 }
 
 
-const NewCalculator = (
+const Calculator = (
     {
       birthSex,
       age,
@@ -141,7 +120,7 @@ const NewCalculator = (
       obplm,
       ollm,
       oatm,
-    } : NewCVDRiskCalculatorParams
+    } : CVDRiskCalculatorParams
 ) : number | null => {
   const coeff = "248153007" === birthSex ? maleCoefficients : "248152002" === birthSex ? femaleCoefficients : null;
   if ( coeff === null){
@@ -163,7 +142,7 @@ const NewCalculator = (
           ? systolicBP - coeff.sbpMean
           : undefined;
 
-  // work out the sum of coefiicients
+  // work out the sum of coefficients
   let sumOfCoeffs = 0.0;
 
   if (ageOffset !== undefined) {
@@ -219,97 +198,4 @@ const NewCalculator = (
   return (1.0 - Math.pow(coeff.baseSurvival, Math.exp(sumOfCoeffs))) * 100.0;
 
 }
-
-
-const Calculator = (
-  {
-    isMale,
-    age,
-    ethnicity,
-    tcHdl,
-    systolicBP,
-    nzDep,
-    exSmoker,
-    smoker,
-    familyHistory,
-    af,
-    diabetes,
-    obplm,
-    ollm,
-    oatm,
-  }: CVDRiskCalculatorParams
-): number => {
-  const coeff = isMale ? maleCoefficients : femaleCoefficients;
-
-  // use means to normalise values
-  const tcHdlOffset =
-    tcHdl !== undefined && tcHdl !== null ? tcHdl - coeff.tcHdlMean : undefined;
-
-  const ageOffset =
-    age !== undefined && age !== null
-      ? Math.max(age, 35.0) - coeff.ageMean
-      : undefined;
-  const nzDepOffset =
-    nzDep !== undefined && nzDep !== null ? nzDep - coeff.nzdMean : undefined;
-  const sbpOffset =
-    systolicBP !== undefined && systolicBP !== null
-      ? systolicBP - coeff.sbpMean
-      : undefined;
-
-  // work out the sum of coefiicients
-  let sumOfCoeffs = 0;
-
-  if (ageOffset !== undefined) {
-    sumOfCoeffs += coeff.cAge * ageOffset;
-  }
-  if (nzDepOffset !== undefined) {
-    sumOfCoeffs += coeff.cNZDep * nzDepOffset;
-  }
-  if (sbpOffset !== undefined) {
-    sumOfCoeffs += coeff.cSBP * sbpOffset;
-    if (ageOffset !== undefined) {
-      sumOfCoeffs += coeff.cAgeSBP * ageOffset * sbpOffset;
-    }
-  }
-  if (tcHdlOffset !== undefined) {
-    sumOfCoeffs += coeff.cTcHdl * tcHdlOffset;
-  }
-  // can't be smoker and ex-smoker
-  if (smoker) {
-    sumOfCoeffs += coeff.cSmoker;
-  } else if (exSmoker) {
-    sumOfCoeffs += coeff.cExSmoker;
-  }
-  if (diabetes) {
-    sumOfCoeffs += coeff.cDiabetes;
-    if (ageOffset !== undefined) {
-      sumOfCoeffs += coeff.cAgeDiabetes * ageOffset;
-    }
-  }
-  if (obplm) {
-    sumOfCoeffs += coeff.cOBPLM;
-    if (sbpOffset !== undefined) {
-      sumOfCoeffs += coeff.cObplmSBP * sbpOffset;
-    }
-  }
-  if (ollm) {
-    sumOfCoeffs += coeff.cOLLM;
-  }
-  if (oatm) {
-    sumOfCoeffs += coeff.cOATM;
-  }
-  if (familyHistory) {
-    sumOfCoeffs += coeff.cFamilyHist;
-  }
-  if (af) {
-    sumOfCoeffs += coeff.cAF;
-  }
-
-  if (ethnicity && ethnicity in coeff.cEthnicity) {
-    sumOfCoeffs +=
-      coeff.cEthnicity[ethnicity as keyof ICVDEthnicityCoefficients];
-  }
-  return (1.0 - Math.pow(coeff.baseSurvival, Math.exp(sumOfCoeffs))) * 100.0;
-};
-
-export default NewCalculator;
+export default Calculator;

@@ -1,7 +1,7 @@
 import { Button, Card, Stack } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import * as React from "react";
-import NewCalculator, { NewCVDRiskCalculatorParams } from "./Calculator";
+import Calculator, { CVDRiskCalculatorParams } from "./Calculator";
 import { Save } from "@mui/icons-material";
 import Client from "fhirclient/lib/Client";
 import {
@@ -10,13 +10,13 @@ import {
 } from "@ahryman40k/ts-fhir-types/lib/R4";
 
 interface Props {
-  params: NewCVDRiskCalculatorParams;
+  params: CVDRiskCalculatorParams;
   client: Client;
 }
 
 export default function Result(props: Props) {
   const { params, client } = props,
-    result = NewCalculator(params),
+    result = Calculator(params),
     formatted = result
       ? Intl.NumberFormat("en", {
           useGrouping: false,

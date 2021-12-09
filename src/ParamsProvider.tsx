@@ -9,7 +9,7 @@ import {
   PatientGenderKind,
 } from "@ahryman40k/ts-fhir-types/lib/R4";
 import moment from "moment";
-import { NewCVDRiskCalculatorParams } from "./Calculator";
+import { CVDRiskCalculatorParams } from "./Calculator";
 import TerminologyClient from "./TxClient";
 
 interface Props {
@@ -26,7 +26,7 @@ interface SourceData {
   smoker: IObservation[];
 }
 
-export interface PrefilledParams extends NewCVDRiskCalculatorParams {
+export interface PrefilledParams extends CVDRiskCalculatorParams {
   birthSex?: string | null;
   age?: number | null; // age in years
   ethnicity?: string | null;
@@ -95,6 +95,7 @@ export const CVDParamsContext = createContext<Promise<PrefilledParams> | null>(
 
 export default function ParamsProvider(props: Props) {
   const { client } = props,
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     sourceData = useMemo(() => getSourceData(client), []),
     params = sourceData.then((data) => extractParams(data));
 
